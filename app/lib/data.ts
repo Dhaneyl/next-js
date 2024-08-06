@@ -17,7 +17,13 @@ export async function fetchRevenue() {
     // console.log('Fetching revenue data...');
     // await new Promise((resolve) => setTimeout(resolve, 3000));
 
-    const data = await sql<Revenue>`SELECT * FROM revenue`;
+    // Fetch the last 5 invoices, sorted by date
+    const data = await sql<LatestInvoiceRaw>`
+    SELECT invoices.amount, customers.name, customers.image_url, customers.email
+    FROM invoices
+    JOIN customers ON invoices.customer_id = customers.id
+    ORDER BY invoices.date DESC
+    LIMIT 5`;
 
     // console.log('Data fetch completed after 3 seconds.');
 
@@ -157,7 +163,7 @@ export async function fetchInvoiceById(id: string) {
       // Convert amount from cents to dollars
       amount: invoice.amount / 100,
     }));
-
+    
     return invoice[0];
   } catch (error) {
     console.error('Database Error:', error);
